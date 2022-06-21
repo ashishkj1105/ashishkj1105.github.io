@@ -39,7 +39,8 @@ codes = {
 "8":"eight"
 "9":"nine"
 };
-alphabet.toString() = prompt("Enter the word: ");
+alphabet = prompt("Enter the word: ");
+alphabet.toString();
 
 for (var x = 0, _pj_a = alphabet.length; x < _pj_a; x += 1) {
   if (alphabet[x] === " ") {
