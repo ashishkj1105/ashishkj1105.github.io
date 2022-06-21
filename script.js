@@ -48,5 +48,5 @@ for (var x = 0, _pj_a = alphabet.length; x < _pj_a; x += 1) {
   }
 
   letter = alphabet[x].toLowerCase();
-  document.write("<p><h1>",codes[letter].toUpperCase(),"</h1></p>");
+  document.write("<p><h3>",codes[letter].toUpperCase(),"</h3></p>");
 }
