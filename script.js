@@ -39,6 +39,7 @@ codes = {
 "8":"eight",
 "9":"nine"
 };
+const timeout = document.getElementsById('cpy')
 var alphabet = String(prompt("Enter the word: "));
 // document.getElementById('text').innerText=alphabet; 
 document.getElementById("box").value = alphabet;
@@ -62,7 +63,7 @@ function myFunction() {
    /* Copy the text inside the text field */
   navigator.clipboard.writeText(copyText.value);
 
-  const timeout = document.getElementsById('cpy')
+  
   setTimeout(hideElement, 1000)
   function hideElement() {
     timeout.style.display = 'none'
