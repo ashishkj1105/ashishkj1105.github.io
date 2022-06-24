@@ -51,7 +51,7 @@ for (var x = 0, _pj_a = alphabet.length; x < _pj_a; x += 1) {
   document.write("<p><h3>",codes[letter].toUpperCase(),"</h3></p>");
 }
 
-function copy() {
+function myFunction() {
   /* Get the text field */
   var copyText = alphabet;
 
