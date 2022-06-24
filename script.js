@@ -51,12 +51,3 @@ for (var x = 0, _pj_a = alphabet.length; x < _pj_a; x += 1) {
   document.write("<p><h3>",codes[letter].toUpperCase(),"</h3></p>");
 }
 
-function myFunction() {
-  /* Get the text field */
-  var copyText = "abcd"
-    navigator.clipboard.writeText(copyText).then(() => {
-        // Alert the user that the action took place.
-        // Nobody likes hidden stuff being done under the hood!
-        alert("Copied to clipboard");
-    });
-}
