@@ -39,7 +39,7 @@ codes = {
 "8":"eight",
 "9":"nine"
 };
-alphabet = String(prompt("Enter the word: "));
+var alphabet = String(prompt("Enter the word: "));
 document.getElementById('text').innerText=alphabet; 
 for (var x = 0, _pj_a = alphabet.length; x < _pj_a; x += 1) {
   if (alphabet[x] === " ") {
