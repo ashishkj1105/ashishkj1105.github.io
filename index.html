@@ -6,10 +6,17 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>NVCODE(ASHISH)</title>
     <link rel="stylesheet" href="style.css">
+	<style>
+	  div.sticky {
+  	  position: -webkit-sticky;
+  	  position: sticky;
+	  </style>
   </head>
   <body>
 	  <center><h4>Your text is: <h2><span id="text"></span></h2></h4></center>
-	  <center style="position:sticky"><input id="box" type="text" style="position:sticky"></center>
+	  <div class="sticky">
+		  <center><input id="box" type="text"></center>
+	  </div>
 	  <div  id="cpy" style="visibility:hidden"><center>Copied!</center></div>
 	  <center><button onclick="myFunction()">Copy text</button></center>
 	<center><button type="button" onClick="window.location.reload();">Reset</button></center>
