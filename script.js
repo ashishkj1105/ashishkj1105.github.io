@@ -61,5 +61,6 @@ function myFunction() {
 
    /* Copy the text inside the text field */
   navigator.clipboard.writeText(copyText.value);
+  document.getElementById("cpy").style.display = "inline";
 }
 
