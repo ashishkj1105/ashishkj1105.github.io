@@ -51,4 +51,18 @@ for (var x = 0, _pj_a = alphabet.length; x < _pj_a; x += 1) {
   letter = alphabet[x].toLowerCase();
   document.write("<p><h3>",codes[letter].toUpperCase(),"</h3></p>");
 }
+function myFunction() {
+  /* Get the text field */
+  var copyText = document.getElementById("box");
+
+  /* Select the text field */
+  copyText.select();
+  copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+   /* Copy the text inside the text field */
+  navigator.clipboard.writeText(copyText.value);
+
+  /* Alert the copied text */
+  alert("Copied the text: " + copyText.value);
+}
 
