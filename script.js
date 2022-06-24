@@ -40,7 +40,8 @@ codes = {
 "9":"nine"
 };
 var alphabet = String(prompt("Enter the word: "));
-document.getElementById('text').innerText=alphabet; 
+// document.getElementById('text').innerText=alphabet; 
+document.getElementById("box").value = alphabet;
 for (var x = 0, _pj_a = alphabet.length; x < _pj_a; x += 1) {
   if (alphabet[x] === " ") {
     document.write("-----------------------------End of word------------------");
