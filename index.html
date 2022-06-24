@@ -11,6 +11,7 @@
   	  position: -webkit-sticky;
   	  position: sticky;
           top: 0;
+		}
 	  </style>
   </head>
   <body>
@@ -19,8 +20,8 @@
 		  <center><input id="box" type="text"></center>
 	  </div>
 	  <div  id="cpy" style="visibility:hidden"><center>Copied!</center></div>
-	  <center><button onclick="myFunction()">Copy text</button></center>
-	<center><button type="button" onClick="window.location.reload();">Reset</button></center>
+	  <div class="sticky"><center><button onclick="myFunction()">Copy text</button></center></div>
+	<div class="sticky"><center><button type="button" onClick="window.location.reload();">Reset</button></center></div>
 	  <script src="script.js"></script>
   </body>
 </html>
