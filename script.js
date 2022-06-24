@@ -62,7 +62,9 @@ function myFunction() {
    /* Copy the text inside the text field */
   navigator.clipboard.writeText(copyText.value);
 
-  /* Alert the copied text */
-  document.write("<center>Copied!</center>");
+  const timeout = document.getElementsById('cpy')
+  setTimeout(hideElement, 1000)
+  function hideElement() {
+    timeout.style.display = 'none'
 }
 
