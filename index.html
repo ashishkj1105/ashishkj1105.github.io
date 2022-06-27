@@ -42,19 +42,20 @@
 		color: white;
 	}
 	.btn2:hover {
-		background-color: red;
+		background-color: green;
 		color: white;
 	}
 	  </style>
   </head>
   <body>
-	  <center><h4>Your text is: <h2><span id="text"></span></h2></h4></center>
+	  <center><h3 id="greet"></h3></center>
 	  <div class="sticky">
-		  <center><input id="box" type="text" readonly></center>
+		  <center><input id="box" placeholder="type your words here!" type="text"></center>
 	  	<div  id="cpy" style="visibility:hidden"><center>Copied!</center></div>
-	  	<center><button class="btn1" onclick="myFunction()">Copy text</button><button class="btn2" type="button" onClick="window.location.reload();">Reset</button></center>
+	  	<center><button type="button" class="btn2" onClick="run()">Submit</button><button class="btn1" onclick="myFunction()">Copy text</button></center>
 <!-- 	  	<center><button type="button" onClick="window.location.reload();">Reset</button></center> -->
 	  </div>
+	 <div id="write"></div>
 	  <script src="script.js"></script>
   </body>
 </html>
