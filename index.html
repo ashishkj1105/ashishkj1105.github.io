@@ -16,6 +16,35 @@
 {
     font-size:30px;
 }
+	.btn1 {
+		background-color: #ddd;
+  border: none;
+  color: black;
+  padding: 16px 32px;
+  text-align: center;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition: 0.3s;
+
+	}
+	.btn2 {
+		background-color: #ddd;
+  border: none;
+  color: black;
+  padding: 16px 32px;
+  text-align: center;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition: 0.3s;
+	}
+	.btn1:hover {
+		background-color: green;
+		color: white;
+	}
+	.btn2:hover {
+		background-color: red;
+		color: white;
+	}
 	  </style>
   </head>
   <body>
@@ -23,7 +52,7 @@
 	  <div class="sticky">
 		  <center><input id="box" type="text" readonly></center>
 	  	<div  id="cpy" style="visibility:hidden"><center>Copied!</center></div>
-	  	<center><button onclick="myFunction()">Copy text</button><button type="button" onClick="window.location.reload();">Reset</button></center>
+	  	<center><button class="btn1" onclick="myFunction()">Copy text</button><button class="btn2" type="button" onClick="window.location.reload();">Reset</button></center>
 <!-- 	  	<center><button type="button" onClick="window.location.reload();">Reset</button></center> -->
 	  </div>
 	  <script src="script.js"></script>
