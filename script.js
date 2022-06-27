@@ -82,3 +82,9 @@ function myFunction() {
     navigator.clipboard.writeText(copyText.value);
     document.getElementById("cpy").style.visibility = "visible";
 }
+
+function reset() {
+    document.getElementById("write").innerHTML = " ";
+    document.getElementById("box").value = "";
+    document.getElementById("box").focus();
+}
