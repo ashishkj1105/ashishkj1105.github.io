@@ -53,6 +53,7 @@ if (hr >= 0 && hr < 12) {
 }
 
 function run() {
+    document.getElementById("cpy").style.visibility = "hidden"
     document.getElementById("write").innerHTML = " ";
     var alphabet = document.getElementById("box").value;
     // document.getElementById('text').innerText=alphabet; 
@@ -87,6 +88,7 @@ function reset() {
     document.getElementById("write").innerHTML = " ";
     document.getElementById("box").value = "";
     document.getElementById("box").focus();
+    document.getElementById("cpy").style.visibility = "hidden"
 }
 
 document.getElementById("box").addEventListener("keypress", function(event) {
@@ -96,5 +98,6 @@ document.getElementById("box").addEventListener("keypress", function(event) {
     event.preventDefault();
     // Trigger the button element with a click
     document.getElementById("sub").click();
+    document.getElementById("cpy").style.visibility = "hidden"
   }
 });
