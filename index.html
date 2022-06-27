@@ -1,61 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>NVCODE(ASHISH)</title>
-    <link rel="stylesheet" href="style.css">
-	<style>
-	  div.sticky {
-  	  position: -webkit-sticky;
-  	  position: sticky;
-          top: 0;
-		}
-	  input[type="text"]
-{
-    font-size:30px;
-}
-	.btn1 {
-		background-color: #ddd;
-  border: none;
-  color: black;
-  padding: 16px 32px;
-  text-align: center;
-  font-size: 16px;
-  margin: 4px 2px;
-  transition: 0.3s;
-
-	}
-	.btn2 {
-		background-color: #ddd;
-  border: none;
-  color: black;
-  padding: 16px 32px;
-  text-align: center;
-  font-size: 16px;
-  margin: 4px 2px;
-  transition: 0.3s;
-	}
-	.btn1:hover {
-		background-color: green;
-		color: white;
-	}
-	.btn2:hover {
-		background-color: green;
-		color: white;
-	}
-	  </style>
-  </head>
-  <body>
-	  <center><h3 id="greet"></h3></center>
-	  <div class="sticky">
-		  <center><input id="box" placeholder="type your words here!" type="text" autofocus></center>
-	  	<div  id="cpy" style="visibility:hidden"><center>Copied!</center></div>
-	  	<center><button type="button" class="btn2" onClick="run()">Submit</button><button class="btn1" onclick="myFunction()">Copy text</button></center>
-<!-- 	  	<center><button type="button" onClick="window.location.reload();">Reset</button></center> -->
-	  </div>
-	 <div id="write"></div>
-	  <script src="script.js"></script>
-  </body>
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <title>NVCODE(ASHISH)</title>
+      <link rel="stylesheet" href="style.css">
+      <style>
+         div.sticky {
+         position: -webkit-sticky;
+         position: sticky;
+         top: 0;
+         }
+         input[type="text"]
+         {
+         font-size:30px;
+         }
+         .btn1 {
+         background-color: #ddd;
+         border: none;
+         color: black;
+         padding: 16px 32px;
+         text-align: center;
+         font-size: 16px;
+         margin: 4px 2px;
+         transition: 0.3s;
+         }
+         .btn2 {
+         background-color: #ddd;
+         border: none;
+         color: black;
+         padding: 16px 32px;
+         text-align: center;
+         font-size: 16px;
+         margin: 4px 2px;
+         transition: 0.3s;
+         }
+         .btn3{
+         background-color: #ddd;
+         border: none;
+         color: black;
+         padding: 16px 32px;
+         text-align: center;
+         font-size: 16px;
+         margin: 4px 2px;
+         transition: 0.3s;
+         }
+         .btn1:hover {
+         background-color: green;
+         color: white;
+         }
+         .btn2:hover {
+         background-color: green;
+         color: white;
+         }
+         .btn3:hover {
+         background-color: red;
+         color: white;
+         }
+      </style>
+   </head>
+   <body>
+      <center>
+         <h3 id="greet"></h3>
+      </center>
+      <div class="sticky">
+         <center><input id="box" placeholder="type your words here!" type="text" autofocus></center>
+         <div  id="cpy" style="visibility:hidden">
+            <center>Copied!</center>
+         </div>
+         <center><input class="btn3" onClick="reset()" type="reset" value="Reset"><button type="button" class="btn2" onClick="run()">Submit</button><button class="btn1" onclick="myFunction()">Copy text</button></center>
+         <!-- 	  	<center><button type="button" onClick="window.location.reload();">Reset</button></center> -->
+      </div>
+      <div id="write"></div>
+      <script src="script.js"></script>
+   </body>
 </html>
