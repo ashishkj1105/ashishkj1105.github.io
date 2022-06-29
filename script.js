@@ -46,9 +46,9 @@ if (hr >= 0 && hr < 12) {
     document.getElementById("greet").innerText = "Good Morning!";
 } else if (hr == 12) {
     document.getElementById("greet").innerText = "Good Noon!";
-} else if (hr >= 12 && hr <= 17) {
+} else if (hr >= 12 && hr < 17) {
     document.getElementById("greet").innerText = "Good Afternoon!";
-} else {
+} else if (hr >= 17 && hr < 0) {
     document.getElementById("greet").innerText = "Good Evening!";
 }
 
