@@ -1,78 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
-   <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta http-equiv="X-UA-Compatible" content="ie=edge">
-      <title>NVCODE(ASHISH)</title>
-      <link rel="stylesheet" href="style.css">
-      <style>
-         div.sticky {
-         position: -webkit-sticky;
-         position: sticky;
-         top: 0;
-         }
-         input[type="text"]
-         {
-         font-size:30px;
-         }
-         .btn1 {
-         background-color: #ddd;
-         border: none;
-         color: black;
-         padding: 16px 32px;
-         text-align: center;
-         font-size: 16px;
-         margin: 4px 2px;
-         transition: 0.3s;
-         }
-         .btn2 {
-         background-color: #ddd;
-         border: none;
-         color: black;
-         padding: 16px 32px;
-         text-align: center;
-         font-size: 16px;
-         margin: 4px 2px;
-         transition: 0.3s;
-         }
-         .btn3{
-         background-color: #ddd;
-         border: none;
-         color: black;
-         padding: 16px 32px;
-         text-align: center;
-         font-size: 16px;
-         margin: 4px 2px;
-         transition: 0.3s;
-         }
-         .btn1:hover {
-         background-color: green;
-         color: white;
-         }
-         .btn2:hover {
-         background-color: green;
-         color: white;
-         }
-         .btn3:hover {
-         background-color: red;
-         color: white;
-         }
-      </style>
-   </head>
-   <body>
-      <center>
-         <h3 id="greet"></h3>
-      </center>
-      <div class="sticky">
-         <center><input id="box" placeholder="type your words here!" type="text" autofocus></center>
-         <div  id="cpy" style="visibility:hidden">
-            <center>Copied!</center>
-         </div>
-         <center><input class="btn3" onClick="reset()" type="reset" value="Reset"><button type="button" class="btn2" id="sub" onClick="run()">Submit/Enter</button><button class="btn1" onclick="myFunction()">Copy text</button></center>
-         <!-- 	  	<center><button type="button" onClick="window.location.reload();">Reset</button></center> -->
-      </div>
-      <div id="write"></div>
-      <script src="script.js"></script>
-   </body>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Real-Time Notepad</title>
+    <!-- Include Firebase libraries from the official CDN -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      textarea {
+        width: 100%;
+        height: 300px;
+        font-size: 16px;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Real-Time Notepad</h1>
+    <p>Type anything below. Changes will instantly sync across all browsers!</p>
+
+    <textarea id="notepad" placeholder="Start typing..."></textarea>
+
+    <script>
+      // TODO: Replace this config object with your own from the Firebase console
+      var firebaseConfig = {
+        apiKey: "AIzaSyCWfmVe1bh8OXgw0PjnAbfVD6ZOnRJ4-6o",
+    authDomain: "clipboard-e729a.firebaseapp.com",
+    projectId: "clipboard-e729a",
+    storageBucket: "clipboard-e729a.firebasestorage.app",
+    messagingSenderId: "212944151207",
+    appId: "1:212944151207:web:fd2dbdec1c76ce2bf13182",
+    measurementId: "G-L6CTJD19HW"
+
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+
+      // Initialize Firestore
+      const db = firebase.firestore();
+
+      // Reference a single document (e.g., "publicNote")
+      const noteDocRef = db.collection("notes").doc("publicNote");
+
+      // Listen for live changes to the document
+      noteDocRef.onSnapshot(function(doc) {
+        if (doc.exists) {
+          const data = doc.data();
+          const textArea = document.getElementById("notepad");
+          if (data && data.content !== textArea.value) {
+            textArea.value = data.content;
+          }
+        }
+      });
+
+      // Update Firestore whenever the text area changes
+      const textArea = document.getElementById("notepad");
+      textArea.addEventListener("input", function() {
+        noteDocRef.set({
+          content: textArea.value
+        });
+      });
+    </script>
+  </body>
 </html>
