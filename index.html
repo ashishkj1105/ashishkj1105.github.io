@@ -2,8 +2,8 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Real-Time Notepad</title>
-    <!-- Include Firebase libraries from the official CDN -->
+    <title>Real-Time Notepad (5 Fixed Tabs + Copy, No Alerts)</title>
+    <!-- Firebase v8 from CDN -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
@@ -11,11 +11,35 @@
         font-family: Arial, sans-serif;
         margin: 20px;
       }
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .tab {
+        padding: 5px 10px;
+        cursor: pointer;
+        background: #eee;
+        border-radius: 5px;
+      }
+      .tab.active {
+        background: #ccc;
+        font-weight: bold;
+      }
       textarea {
         width: 100%;
         height: 300px;
         font-size: 16px;
         padding: 10px;
+      }
+      .controls {
+        margin-top: 10px;
+      }
+      button {
+        font-size: 14px;
+        padding: 5px 10px;
+        cursor: pointer;
+        margin-right: 5px;
       }
     </style>
   </head>
@@ -23,19 +47,31 @@
     <h1>Real-Time Notepad</h1>
     <p>Type anything below. Changes will instantly sync across all browsers!</p>
 
+    <!-- Tabs -->
+    <div class="tabs" id="tabsContainer">
+      <!-- We'll create 5 tabs here in JavaScript -->
+    </div>
+
+    <!-- Text area -->
     <textarea id="notepad" placeholder="Start typing..."></textarea>
 
+    <!-- Buttons / Controls -->
+    <div class="controls">
+      <button id="copyButton">Copy Text</button>
+    </div>
+
     <script>
-      // TODO: Replace this config object with your own from the Firebase console
+      // ==========================
+      // 1. Firebase Config
+      // ==========================
       var firebaseConfig = {
         apiKey: "AIzaSyCWfmVe1bh8OXgw0PjnAbfVD6ZOnRJ4-6o",
-    authDomain: "clipboard-e729a.firebaseapp.com",
-    projectId: "clipboard-e729a",
-    storageBucket: "clipboard-e729a.firebasestorage.app",
-    messagingSenderId: "212944151207",
-    appId: "1:212944151207:web:fd2dbdec1c76ce2bf13182",
-    measurementId: "G-L6CTJD19HW"
-
+        authDomain: "clipboard-e729a.firebaseapp.com",
+        projectId: "clipboard-e729a",
+        storageBucket: "clipboard-e729a.firebasestorage.app",
+        messagingSenderId: "212944151207",
+        appId: "1:212944151207:web:fd2dbdec1c76ce2bf13182",
+        measurementId: "G-L6CTJD19HW"
       };
 
       // Initialize Firebase
@@ -44,26 +80,118 @@
       // Initialize Firestore
       const db = firebase.firestore();
 
-      // Reference a single document (e.g., "publicNote")
-      const noteDocRef = db.collection("notes").doc("publicNote");
+      // ==========================
+      // 2. Setup references/state
+      // ==========================
+      const textArea = document.getElementById("notepad");
+      const copyButton = document.getElementById("copyButton");
+      const tabsContainer = document.getElementById("tabsContainer");
 
-      // Listen for live changes to the document
-      noteDocRef.onSnapshot(function(doc) {
-        if (doc.exists) {
-          const data = doc.data();
-          const textArea = document.getElementById("notepad");
-          if (data && data.content !== textArea.value) {
-            textArea.value = data.content;
-          }
-        }
+      // We’ll have exactly 5 tabs, each referencing a different Firestore doc
+      const docsList = [
+        { id: "publicNote1", label: "Tab 1" },
+        { id: "publicNote2", label: "Tab 2" },
+        { id: "publicNote3", label: "Tab 3" },
+        { id: "publicNote4", label: "Tab 4" },
+        { id: "publicNote5", label: "Tab 5" },
+      ];
+
+      let activeDocID = null;
+      let unsubscribe = null; // stores a function to stop listening
+
+      // ==========================
+      // 3. Create tab elements
+      // ==========================
+      docsList.forEach((item, index) => {
+        const tabDiv = document.createElement("div");
+        tabDiv.classList.add("tab");
+        if (index === 0) tabDiv.classList.add("active"); // make first one active
+        tabDiv.textContent = item.label;
+        tabDiv.dataset.docid = item.id;
+        tabsContainer.appendChild(tabDiv);
+
+        // Clicking a tab
+        tabDiv.addEventListener("click", () => {
+          switchTab(item.id);
+        });
       });
 
-      // Update Firestore whenever the text area changes
-      const textArea = document.getElementById("notepad");
-      textArea.addEventListener("input", function() {
-        noteDocRef.set({
-          content: textArea.value
+      // Set the active doc to the first item by default
+      activeDocID = docsList[0].id;
+      subscribeToDoc(activeDocID);
+
+      // ==========================
+      // 4. Subscribe to doc changes
+      // ==========================
+      function subscribeToDoc(docID) {
+        const docRef = db.collection("notes").doc(docID);
+        // Unsubscribe from any previous listener
+        if (unsubscribe) unsubscribe();
+
+        unsubscribe = docRef.onSnapshot((doc) => {
+          if (doc.exists) {
+            const data = doc.data();
+            if (data && data.content !== textArea.value) {
+              textArea.value = data.content;
+            }
+          } else {
+            // doc doesn't exist yet, set empty
+            textArea.value = "";
+          }
         });
+      }
+
+      // ==========================
+      // 5. Switch tabs
+      // ==========================
+      function switchTab(newDocID) {
+        if (newDocID === activeDocID) return; // no change needed
+        // Stop listening to old doc
+        if (unsubscribe) unsubscribe();
+
+        // Clear text area while we load
+        textArea.value = "";
+
+        // Update activeDocID
+        activeDocID = newDocID;
+        updateTabStyles(newDocID);
+
+        // Subscribe to new doc
+        subscribeToDoc(newDocID);
+      }
+
+      function updateTabStyles(activeID) {
+        const allTabs = document.querySelectorAll(".tab");
+        allTabs.forEach((tab) => {
+          if (tab.dataset.docid === activeID) {
+            tab.classList.add("active");
+          } else {
+            tab.classList.remove("active");
+          }
+        });
+      }
+
+      // ==========================
+      // 6. Sync Firestore on text changes
+      // ==========================
+      textArea.addEventListener("input", () => {
+        if (!activeDocID) return;
+        const docRef = db.collection("notes").doc(activeDocID);
+        docRef.set({ content: textArea.value });
+      });
+
+      // ==========================
+      // 7. Copy button (no alerts)
+      // ==========================
+      copyButton.addEventListener("click", () => {
+        navigator.clipboard
+          .writeText(textArea.value)
+          .then(() => {
+            console.log("Text copied to clipboard (no alert).");
+          })
+          .catch((err) => {
+            console.error("Copy failed: ", err);
+          });
       });
     </script>
   </body>
