@@ -2,7 +2,8 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Team Notepad</title>
+    <title>Real-Time Notepad (5 Fixed Tabs + Copy, No Alerts)</title>
+    <!-- Firebase v8 from CDN -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
@@ -10,50 +11,55 @@
         font-family: Arial, sans-serif;
         margin: 20px;
       }
-      .tab-container {
+      .tabs {
         display: flex;
+        gap: 10px;
         margin-bottom: 10px;
-        gap: 5px;
       }
       .tab {
-        padding: 10px 15px;
+        padding: 5px 10px;
         cursor: pointer;
-        background-color: #f0f0f0;
-        border: 1px solid #ccc;
-        border-radius: 5px 5px 0 0;
-        transition: background-color 0.2s;
+        background: #eee;
+        border-radius: 5px;
       }
       .tab.active {
-        background-color: white;
-        border-bottom: 1px solid white;
-      }
-      .tab:hover {
-        background-color: #e0e0e0;
+        background: #ccc;
+        font-weight: bold;
       }
       textarea {
         width: 100%;
         height: 300px;
         font-size: 16px;
         padding: 10px;
-        border: 1px solid #ccc;
-        margin-top: -1px;
       }
+      .controls {
+        margin-top: 10px;
+      }
+      button {
+        font-size: 14px;
+        padding: 5px 10px;
+        cursor: pointer;
+        margin-right: 5px;
+      }
+
+      /* Modal styles */
       .modal {
-        display: block;
+        display: block; /* Show the modal by default */
         position: fixed;
         z-index: 1000;
         left: 0;
         top: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
       }
       .modal-content {
         background-color: #fefefe;
-        margin: 15% auto;
+        margin: 15% auto; /* 15% from the top and centered */
         padding: 20px;
         border: 1px solid #888;
-        width: 300px;
+        width: 300px; /* Could be more or less, depending on screen size */
         border-radius: 5px;
         text-align: center;
       }
@@ -68,17 +74,19 @@
         font-size: 16px;
         cursor: pointer;
       }
-      #mainContent {
-        display: none;
-      }
-      #errorMessage {
+      .modal-content p {
         color: red;
         display: none;
-        margin-top: 10px;
+      }
+
+      /* Hide the main content initially */
+      #mainContent {
+        display: none;
       }
     </style>
   </head>
   <body>
+    <!-- Modal for password entry -->
     <div id="passwordModal" class="modal">
       <div class="modal-content">
         <h2>Enter Password</h2>
@@ -89,40 +97,67 @@
       </div>
     </div>
 
+    <!-- Main content -->
     <div id="mainContent">
-      <h1>Team Notepad</h1>
-      <div class="tab-container">
-        <div class="tab active" data-user="Nitin">Nitin</div>
-        <div class="tab" data-user="Meghna">Meghna</div>
-        <div class="tab" data-user="Robin">Robin</div>
-        <div class="tab" data-user="Imti">Imti</div>
-        <div class="tab" data-user="Karan">Karan</div>
-        <div class="tab" data-user="Rashmi">Rashmi</div>
-      </div>
+      <h1>Real-Time Notepad</h1>
       <p>Type anything below. Changes will instantly sync across all browsers!</p>
+
+      <!-- Tabs -->
+      <div class="tabs" id="tabsContainer">
+        <!-- We'll create 5 tabs here in JavaScript -->
+      </div>
+
+      <!-- Text area -->
       <textarea id="notepad" placeholder="Start typing..."></textarea>
 
+      <!-- Buttons / Controls -->
+      <div class="controls">
+        <button id="copyButton">Copy Text</button>
+      </div>
+
       <script>
-        // Password Protection
-        document.getElementById('submitPassword').addEventListener('click', function() {
-          const enteredPassword = document.getElementById('passwordInput').value;
+        // ==========================
+        // 1. Password Protection Script
+        // ==========================
+        (function () {
+          const passwordModal = document.getElementById('passwordModal');
+          const submitPassword = document.getElementById('submitPassword');
+          const passwordInput = document.getElementById('passwordInput');
+          const errorMessage = document.getElementById('errorMessage');
+          const mainContent = document.getElementById('mainContent');
+
           const correctPassword = 'ni3';
-          if (enteredPassword === correctPassword) {
-            document.getElementById('passwordModal').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
-          } else {
-            document.getElementById('errorMessage').style.display = 'block';
-          }
-        });
 
-        document.getElementById('passwordInput').addEventListener('keyup', function(event) {
-          if (event.key === 'Enter') {
-            document.getElementById('submitPassword').click();
+          // Function to handle password submission
+          function handlePasswordSubmit() {
+            const enteredPassword = passwordInput.value;
+            if (enteredPassword === correctPassword) {
+              // Hide modal and show main content
+              passwordModal.style.display = 'none';
+              mainContent.style.display = 'block';
+            } else {
+              // Show error message
+              errorMessage.style.display = 'block';
+              passwordInput.value = '';
+              passwordInput.focus();
+            }
           }
-        });
 
-        // Firebase Configuration
-        const firebaseConfig = {
+          // Event listener for submit button
+          submitPassword.addEventListener('click', handlePasswordSubmit);
+
+          // Event listener for Enter key
+          passwordInput.addEventListener('keyup', function (event) {
+            if (event.key === 'Enter') {
+              handlePasswordSubmit();
+            }
+          });
+        })();
+
+        // ==========================
+        // 2. Firebase Config
+        // ==========================
+        var firebaseConfig = {
           apiKey: "AIzaSyCWfmVe1bh8OXgw0PjnAbfVD6ZOnRJ4-6o",
           authDomain: "clipboard-e729a.firebaseapp.com",
           projectId: "clipboard-e729a",
@@ -134,68 +169,123 @@
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
+
+        // Initialize Firestore
         const db = firebase.firestore();
 
-        let currentNoteRef = null;
-        let unsubscribe = null;
-        let currentUser = 'Nitin';
+        // ==========================
+        // 3. Setup references/state
+        // ==========================
+        const textArea = document.getElementById("notepad");
+        const copyButton = document.getElementById("copyButton");
+        const tabsContainer = document.getElementById("tabsContainer");
 
-        // Tab Functionality
-        document.querySelectorAll('.tab').forEach(tab => {
-          tab.addEventListener('click', function() {
-            if (this.classList.contains('active')) return;
-            
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            currentUser = this.dataset.user;
-            switchUserNotepad(currentUser);
+        // We’ll have exactly 5 tabs, each referencing a different Firestore doc
+        const docsList = [
+          { id: "publicNote1", label: "Tab 1" },
+          { id: "publicNote2", label: "Tab 2" },
+          { id: "publicNote3", label: "Tab 3" },
+          { id: "publicNote4", label: "Tab 4" },
+          { id: "publicNote5", label: "Tab 5" },
+        ];
+
+        let activeDocID = null;
+        let unsubscribe = null; // stores a function to stop listening
+
+        // ==========================
+        // 4. Create tab elements
+        // ==========================
+        docsList.forEach((item, index) => {
+          const tabDiv = document.createElement("div");
+          tabDiv.classList.add("tab");
+          if (index === 0) tabDiv.classList.add("active"); // make first one active
+          tabDiv.textContent = item.label;
+          tabDiv.dataset.docid = item.id;
+          tabsContainer.appendChild(tabDiv);
+
+          // Clicking a tab
+          tabDiv.addEventListener("click", () => {
+            switchTab(item.id);
           });
         });
 
-        function switchUserNotepad(userId) {
-          // Clear previous listener
-          if (unsubscribe) unsubscribe();
-          
-          // Set up new document reference
-          currentNoteRef = db.collection("userNotes").doc(userId);
-          
-          // Disable textarea during load
-          const textArea = document.getElementById("notepad");
-          textArea.disabled = true;
+        // Set the active doc to the first item by default
+        activeDocID = docsList[0].id;
+        subscribeToDoc(activeDocID);
 
-          // Get initial data and set up listener
-          unsubscribe = currentNoteRef.onSnapshot(doc => {
+        // ==========================
+        // 5. Subscribe to doc changes
+        // ==========================
+        function subscribeToDoc(docID) {
+          const docRef = db.collection("notes").doc(docID);
+          // Unsubscribe from any previous listener
+          if (unsubscribe) unsubscribe();
+
+          unsubscribe = docRef.onSnapshot((doc) => {
             if (doc.exists) {
-              textArea.value = doc.data().content || '';
+              const data = doc.data();
+              if (data && data.content !== textArea.value) {
+                textArea.value = data.content;
+              }
             } else {
-              textArea.value = '';
+              // doc doesn't exist yet, set empty
+              textArea.value = "";
             }
-            textArea.disabled = false;
-          }, error => {
-            console.error("Error getting document:", error);
-            textArea.disabled = false;
           });
         }
 
-        // Text Input Handling
-        const textArea = document.getElementById("notepad");
-        let typingTimer;
-        
-        textArea.addEventListener("input", function() {
-          clearTimeout(typingTimer);
-          typingTimer = setTimeout(() => {
-            if (currentNoteRef) {
-              currentNoteRef.set({ 
-                content: textArea.value,
-                lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-                user: currentUser
-              }).catch(error => console.error("Error writing document: ", error));
+        // ==========================
+        // 6. Switch tabs
+        // ==========================
+        function switchTab(newDocID) {
+          if (newDocID === activeDocID) return; // no change needed
+          // Stop listening to old doc
+          if (unsubscribe) unsubscribe();
+
+          // Clear text area while we load
+          textArea.value = "";
+
+          // Update activeDocID
+          activeDocID = newDocID;
+          updateTabStyles(newDocID);
+
+          // Subscribe to new doc
+          subscribeToDoc(newDocID);
+        }
+
+        function updateTabStyles(activeID) {
+          const allTabs = document.querySelectorAll(".tab");
+          allTabs.forEach((tab) => {
+            if (tab.dataset.docid === activeID) {
+              tab.classList.add("active");
+            } else {
+              tab.classList.remove("active");
             }
-          }, 300);
+          });
+        }
+
+        // ==========================
+        // 7. Sync Firestore on text changes
+        // ==========================
+        textArea.addEventListener("input", () => {
+          if (!activeDocID) return;
+          const docRef = db.collection("notes").doc(activeDocID);
+          docRef.set({ content: textArea.value });
         });
 
-        // Initialize first tab
-        switchUserNotepad('Nitin');
+        // ==========================
+        // 8. Copy button (no alerts)
+        // ==========================
+        copyButton.addEventListener("click", () => {
+          navigator.clipboard
+            .writeText(textArea.value)
+            .then(() => {
+              console.log("Text copied to clipboard (no alert).");
+            })
+            .catch((err) => {
+              console.error("Copy failed: ", err);
+            });
+        });
       </script>
     </div>
   </body>
