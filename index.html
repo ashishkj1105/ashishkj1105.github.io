@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <title>Team Notepad</title>
-    <!-- Include Firebase libraries from the official CDN -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
@@ -11,7 +10,6 @@
         font-family: Arial, sans-serif;
         margin: 20px;
       }
-      /* Tab styling */
       .tab-container {
         display: flex;
         margin-bottom: 10px;
@@ -38,9 +36,8 @@
         font-size: 16px;
         padding: 10px;
         border: 1px solid #ccc;
-        margin-top: -1px; /* Align with tab border */
+        margin-top: -1px;
       }
-      /* Modal styles */
       .modal {
         display: block;
         position: fixed;
@@ -82,7 +79,6 @@
     </style>
   </head>
   <body>
-    <!-- Password Modal -->
     <div id="passwordModal" class="modal">
       <div class="modal-content">
         <h2>Enter Password</h2>
@@ -93,7 +89,6 @@
       </div>
     </div>
 
-    <!-- Main Content -->
     <div id="mainContent">
       <h1>Team Notepad</h1>
       <div class="tab-container">
@@ -147,43 +142,51 @@
         // Tab Functionality
         document.querySelectorAll('.tab').forEach(tab => {
           tab.addEventListener('click', function() {
-            // Switch active tab
+            if (this.classList.contains('active')) return;
+            
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             this.classList.add('active');
-            
-            // Switch to selected user's notepad
             switchUserNotepad(this.dataset.user);
           });
         });
 
         function switchUserNotepad(userId) {
-          // Unsubscribe from previous listener
+          // Clear previous listener
           if (unsubscribe) unsubscribe();
           
-          // Set up new reference
-          currentNoteRef = db.collection("notes").doc(userId);
+          // Set up new document reference
+          currentNoteRef = db.collection("userNotes").doc(userId);
           
-          // Set up real-time listener
+          // Get initial data and set up listener
           unsubscribe = currentNoteRef.onSnapshot(doc => {
+            const textArea = document.getElementById("notepad");
             if (doc.exists) {
-              const data = doc.data();
-              const textArea = document.getElementById("notepad");
-              if (data.content !== textArea.value) {
-                textArea.value = data.content || '';
-              }
+              textArea.value = doc.data().content || '';
+            } else {
+              textArea.value = '';
             }
+          }, error => {
+            console.error("Error getting document:", error);
           });
         }
 
-        // Textarea Input Handling
-        document.getElementById("notepad").addEventListener("input", function() {
-          if (currentNoteRef) {
-            currentNoteRef.set({ content: this.value })
-              .catch(error => console.error("Error writing document: ", error));
-          }
+        // Text Input Handling
+        const textArea = document.getElementById("notepad");
+        let typingTimer;
+        
+        textArea.addEventListener("input", function() {
+          clearTimeout(typingTimer);
+          typingTimer = setTimeout(() => {
+            if (currentNoteRef) {
+              currentNoteRef.set({ 
+                content: textArea.value,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+              }).catch(error => console.error("Error writing document: ", error));
+            }
+          }, 500);
         });
 
-        // Initialize with first user
+        // Initialize first tab
         switchUserNotepad('Nitin');
       </script>
     </div>
