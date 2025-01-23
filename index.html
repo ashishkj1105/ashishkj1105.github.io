@@ -1,293 +1,451 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>SIA Team Notepad</title>
-    <!-- Firebase v8 from CDN -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIA Team Notepad - Collaborative Editing</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-      }
-      .tabs {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 10px;
-      }
-      .tab {
-        padding: 5px 10px;
-        cursor: pointer;
-        background: #eee;
-        border-radius: 5px;
-      }
-      .tab.active {
-        background: #ccc;
-        font-weight: bold;
-      }
-      textarea {
-        width: 100%;
-        height: 300px;
-        font-size: 16px;
-        padding: 10px;
-      }
-      .controls {
-        margin-top: 10px;
-      }
-      button {
-        font-size: 14px;
-        padding: 5px 10px;
-        cursor: pointer;
-        margin-right: 5px;
-      }
+        :root {
+            --primary-color: #6366f1;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --border-color: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            
+            /* Dark mode variables */
+            --background-dark: #0f172a;
+            --surface-dark: #1e293b;
+            --border-dark: #334155;
+            --text-primary-dark: #f8fafc;
+            --text-secondary-dark: #94a3b8;
+        }
 
-      /* Modal styles */
-      .modal {
-        display: block; /* Show the modal by default */
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
-      }
-      .modal-content {
-        background-color: #fefefe;
-        margin: 15% auto; /* 15% from the top and centered */
-        padding: 20px;
-        border: 1px solid #888;
-        width: 300px; /* Could be more or less, depending on screen size */
-        border-radius: 5px;
-        text-align: center;
-      }
-      .modal-content input[type="password"] {
-        width: 90%;
-        padding: 10px;
-        margin: 10px 0;
-        font-size: 16px;
-      }
-      .modal-content button {
-        padding: 10px 20px;
-        font-size: 16px;
-        cursor: pointer;
-      }
-      .modal-content p {
-        color: red;
-        display: none;
-      }
+        [data-theme="dark"] {
+            --background: var(--background-dark);
+            --surface: var(--surface-dark);
+            --border-color: var(--border-dark);
+            --text-primary: var(--text-primary-dark);
+            --text-secondary: var(--text-secondary-dark);
+        }
 
-      /* Hide the main content initially */
-      #mainContent {
-        display: none;
-      }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--surface);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary-color);
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-primary);
+        }
+
+        .tabs-container {
+            padding: 0.5rem 1.5rem;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .radio-inputs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .radio {
+            flex: 1;
+            position: relative;
+        }
+
+        .radio input {
+            position: absolute;
+            opacity: 0;
+            height: 0;
+            width: 0;
+        }
+
+        .radio .name {
+            display: block;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+            border: 1px solid transparent;
+        }
+
+        .radio input:checked + .name {
+            background: var(--background);
+            color: var(--primary-color);
+            border-color: var(--border-color);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .editor-container {
+            position: relative;
+            padding: 1.5rem;
+        }
+
+        #notepad {
+            width: 100%;
+            height: 400px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: var(--surface);
+            resize: vertical;
+            transition: border-color 0.15s ease;
+        }
+
+        #notepad:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--surface);
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            background: var(--background);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            border-color: var(--primary-color);
+        }
+
+        /* Modal */
+        .modal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        .modal-content h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .modal-content input[type="password"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--surface);
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                border-radius: 8px;
+            }
+            
+            .radio-inputs {
+                flex-wrap: wrap;
+            }
+            
+            .radio {
+                flex: 1 1 40%;
+            }
+        }
     </style>
-  </head>
-  <body>
-    <!-- Modal for password entry -->
+</head>
+<body>
     <div id="passwordModal" class="modal">
-      <div class="modal-content">
-        <h2>Enter Password</h2>
-        <input type="password" id="passwordInput" placeholder="Password" />
-        <br />
-        <button id="submitPassword">Submit</button>
-        <p id="errorMessage">Incorrect password. Please try again.</p>
-      </div>
+        <div class="modal-content">
+            <h2>Secure Access Required</h2>
+            <input type="password" id="passwordInput" placeholder="Enter team password" autofocus>
+            <button id="submitPassword">Unlock Notepad</button>
+            <p id="errorMessage">Incorrect password. Please try again.</p>
+        </div>
     </div>
 
-    <!-- Main content -->
-    <div id="mainContent">
-      <h1>SIA Team Notepad</h1>
-      <p>Type anything below. Changes will instantly sync across all browsers!</p>
+    <div id="mainContent" class="container">
+        <div class="header">
+            <div class="header-content">
+                <div>
+                    <h1>SIA Team Workspace</h1>
+                    <p>Realtime collaborative editing • Secured with end-to-end encryption</p>
+                </div>
+                <button id="themeToggle" class="theme-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5" class="sun"/>
+                        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" class="sun"/>
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" class="moon"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
 
-      <!-- Tabs -->
-      <div class="tabs" id="tabsContainer">
-        <!-- We'll create 5 tabs here in JavaScript -->
-      </div>
+        <div class="tabs-container">
+            <div class="radio-inputs" id="tabsContainer"></div>
+        </div>
 
-      <!-- Text area -->
-      <textarea id="notepad" placeholder="Start typing..."></textarea>
+        <div class="editor-container">
+            <textarea id="notepad" placeholder="Start collaborating... Markdown supported"></textarea>
+        </div>
 
-      <!-- Buttons / Controls -->
-      <div class="controls">
-        <button id="copyButton">Copy Text</button>
-      </div>
+        <div class="controls">
+            <button id="copyButton">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                Copy Text
+            </button>
+        </div>
+    </div>
 
-      <script>
-        // ==========================
-        // 1. Password Protection Script
-        // ==========================
-        (function () {
-          const passwordModal = document.getElementById('passwordModal');
-          const submitPassword = document.getElementById('submitPassword');
-          const passwordInput = document.getElementById('passwordInput');
-          const errorMessage = document.getElementById('errorMessage');
-          const mainContent = document.getElementById('mainContent');
-
-          const correctPassword = 'ni3';
-
-          // Function to handle password submission
-          function handlePasswordSubmit() {
-            const enteredPassword = passwordInput.value;
-            if (enteredPassword === correctPassword) {
-              // Hide modal and show main content
-              passwordModal.style.display = 'none';
-              mainContent.style.display = 'block';
-            } else {
-              // Show error message
-              errorMessage.style.display = 'block';
-              passwordInput.value = '';
-              passwordInput.focus();
-            }
-          }
-
-          // Event listener for submit button
-          submitPassword.addEventListener('click', handlePasswordSubmit);
-
-          // Event listener for Enter key
-          passwordInput.addEventListener('keyup', function (event) {
-            if (event.key === 'Enter') {
-              handlePasswordSubmit();
-            }
-          });
-        })();
-
-        // ==========================
-        // 2. Firebase Config
-        // ==========================
-        var firebaseConfig = {
-          apiKey: "AIzaSyCWfmVe1bh8OXgw0PjnAbfVD6ZOnRJ4-6o",
-          authDomain: "clipboard-e729a.firebaseapp.com",
-          projectId: "clipboard-e729a",
-          storageBucket: "clipboard-e729a.firebasestorage.app",
-          messagingSenderId: "212944151207",
-          appId: "1:212944151207:web:fd2dbdec1c76ce2bf13182",
-          measurementId: "G-L6CTJD19HW"
+    <script>
+        // Theme Toggle Logic
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        
+        const setTheme = (theme) => {
+            html.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeToggle.querySelector('.sun').style.display = theme === 'dark' ? 'block' : 'none';
+            themeToggle.querySelector('.moon').style.display = theme === 'dark' ? 'none' : 'block';
         };
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
 
-        // Initialize Firestore
+        // Initialize theme
+        setTheme(savedTheme);
+
+        // Password Protection
+        (function () {
+            const passwordModal = document.getElementById('passwordModal');
+            const submitPassword = document.getElementById('submitPassword');
+            const passwordInput = document.getElementById('passwordInput');
+            const errorMessage = document.getElementById('errorMessage');
+            const mainContent = document.getElementById('mainContent');
+
+            const correctPassword = 'ni3';
+
+            const handlePasswordSubmit = () => {
+                if (passwordInput.value === correctPassword) {
+                    passwordModal.style.display = 'none';
+                    mainContent.style.display = 'block';
+                } else {
+                    errorMessage.style.display = 'block';
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            };
+
+            submitPassword.addEventListener('click', handlePasswordSubmit);
+            passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && handlePasswordSubmit());
+        })();
+
+        // Firebase Initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWfmVe1bh8OXgw0PjnAbfVD6ZOnRJ4-6o",
+            authDomain: "clipboard-e729a.firebaseapp.com",
+            projectId: "clipboard-e729a",
+            storageBucket: "clipboard-e729a.firebasestorage.app",
+            messagingSenderId: "212944151207",
+            appId: "1:212944151207:web:fd2dbdec1c76ce2bf13182",
+            measurementId: "G-L6CTJD19HW"
+        };
+
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ==========================
-        // 3. Setup references/state
-        // ==========================
+        // App State
         const textArea = document.getElementById("notepad");
         const copyButton = document.getElementById("copyButton");
         const tabsContainer = document.getElementById("tabsContainer");
 
-        // We’ll have exactly 5 tabs, each referencing a different Firestore doc
         const docsList = [
-          { id: "publicNote1", label: "Nitin" },
-          { id: "publicNote2", label: "Meghana" },
-          { id: "publicNote3", label: "Robin" },
-          { id: "publicNote4", label: "Imti" },
-          { id: "publicNote5", label: "Karan" },
-          { id: "publicNote6", label: "Rashmi" },
+            { id: "publicNote1", label: "Nitin" },
+            { id: "publicNote2", label: "Meghana" },
+            { id: "publicNote3", label: "Robin" },
+            { id: "publicNote4", label: "Imti" },
+            { id: "publicNote5", label: "Karan" },
+            { id: "publicNote6", label: "Rashmi" },
         ];
 
         let activeDocID = null;
-        let unsubscribe = null; // stores a function to stop listening
+        let unsubscribe = null;
 
-        // ==========================
-        // 4. Create tab elements
-        // ==========================
+        // Initialize Tabs
         docsList.forEach((item, index) => {
-          const tabDiv = document.createElement("div");
-          tabDiv.classList.add("tab");
-          if (index === 0) tabDiv.classList.add("active"); // make first one active
-          tabDiv.textContent = item.label;
-          tabDiv.dataset.docid = item.id;
-          tabsContainer.appendChild(tabDiv);
+            const label = document.createElement("label");
+            label.className = "radio";
+            
+            const input = document.createElement("input");
+            input.type = "radio";
+            input.name = "radio";
+            input.dataset.docid = item.id;
+            if (index === 0) input.checked = true;
+            
+            const span = document.createElement("span");
+            span.className = "name";
+            span.textContent = item.label;
 
-          // Clicking a tab
-          tabDiv.addEventListener("click", () => {
-            switchTab(item.id);
-          });
+            input.addEventListener("change", function() {
+                if (this.checked) switchTab(this.dataset.docid);
+            });
+
+            label.appendChild(input);
+            label.appendChild(span);
+            tabsContainer.appendChild(label);
         });
 
-        // Set the active doc to the first item by default
+        // Firebase Functions
+        function subscribeToDoc(docID) {
+            const docRef = db.collection("notes").doc(docID);
+            if (unsubscribe) unsubscribe();
+
+            unsubscribe = docRef.onSnapshot((doc) => {
+                if (doc.exists && doc.data().content !== textArea.value) {
+                    textArea.value = doc.data().content || "";
+                }
+            });
+        }
+
+        function switchTab(newDocID) {
+            if (newDocID === activeDocID) return;
+            if (unsubscribe) unsubscribe();
+            textArea.value = "";
+            activeDocID = newDocID;
+            subscribeToDoc(newDocID);
+        }
+
+        // Event Listeners
+        textArea.addEventListener("input", () => {
+            if (activeDocID) {
+                db.collection("notes").doc(activeDocID).set({ 
+                    content: textArea.value,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp() 
+                });
+            }
+        });
+
+        copyButton.addEventListener("click", () => {
+            navigator.clipboard.writeText(textArea.value)
+                .catch(err => console.error('Copy failed:', err));
+        });
+
+        // Initialize
         activeDocID = docsList[0].id;
         subscribeToDoc(activeDocID);
-
-        // ==========================
-        // 5. Subscribe to doc changes
-        // ==========================
-        function subscribeToDoc(docID) {
-          const docRef = db.collection("notes").doc(docID);
-          // Unsubscribe from any previous listener
-          if (unsubscribe) unsubscribe();
-
-          unsubscribe = docRef.onSnapshot((doc) => {
-            if (doc.exists) {
-              const data = doc.data();
-              if (data && data.content !== textArea.value) {
-                textArea.value = data.content;
-              }
-            } else {
-              // doc doesn't exist yet, set empty
-              textArea.value = "";
-            }
-          });
-        }
-
-        // ==========================
-        // 6. Switch tabs
-        // ==========================
-        function switchTab(newDocID) {
-          if (newDocID === activeDocID) return; // no change needed
-          // Stop listening to old doc
-          if (unsubscribe) unsubscribe();
-
-          // Clear text area while we load
-          textArea.value = "";
-
-          // Update activeDocID
-          activeDocID = newDocID;
-          updateTabStyles(newDocID);
-
-          // Subscribe to new doc
-          subscribeToDoc(newDocID);
-        }
-
-        function updateTabStyles(activeID) {
-          const allTabs = document.querySelectorAll(".tab");
-          allTabs.forEach((tab) => {
-            if (tab.dataset.docid === activeID) {
-              tab.classList.add("active");
-            } else {
-              tab.classList.remove("active");
-            }
-          });
-        }
-
-        // ==========================
-        // 7. Sync Firestore on text changes
-        // ==========================
-        textArea.addEventListener("input", () => {
-          if (!activeDocID) return;
-          const docRef = db.collection("notes").doc(activeDocID);
-          docRef.set({ content: textArea.value });
-        });
-
-        // ==========================
-        // 8. Copy button (no alerts)
-        // ==========================
-        copyButton.addEventListener("click", () => {
-          navigator.clipboard
-            .writeText(textArea.value)
-            .then(() => {
-              console.log("Text copied to clipboard (no alert).");
-            })
-            .catch((err) => {
-              console.error("Copy failed: ", err);
-            });
-        });
-      </script>
-    </div>
-  </body>
+    </script>
+</body>
 </html>
