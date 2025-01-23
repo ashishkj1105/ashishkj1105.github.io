@@ -138,6 +138,7 @@
 
         let currentNoteRef = null;
         let unsubscribe = null;
+        let currentUser = 'Nitin';
 
         // Tab Functionality
         document.querySelectorAll('.tab').forEach(tab => {
@@ -146,7 +147,8 @@
             
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             this.classList.add('active');
-            switchUserNotepad(this.dataset.user);
+            currentUser = this.dataset.user;
+            switchUserNotepad(currentUser);
           });
         });
 
@@ -157,16 +159,21 @@
           // Set up new document reference
           currentNoteRef = db.collection("userNotes").doc(userId);
           
+          // Disable textarea during load
+          const textArea = document.getElementById("notepad");
+          textArea.disabled = true;
+
           // Get initial data and set up listener
           unsubscribe = currentNoteRef.onSnapshot(doc => {
-            const textArea = document.getElementById("notepad");
             if (doc.exists) {
               textArea.value = doc.data().content || '';
             } else {
               textArea.value = '';
             }
+            textArea.disabled = false;
           }, error => {
             console.error("Error getting document:", error);
+            textArea.disabled = false;
           });
         }
 
@@ -180,10 +187,11 @@
             if (currentNoteRef) {
               currentNoteRef.set({ 
                 content: textArea.value,
-                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                user: currentUser
               }).catch(error => console.error("Error writing document: ", error));
             }
-          }, 500);
+          }, 300);
         });
 
         // Initialize first tab
