@@ -2,8 +2,8 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Real-Time Notepad (5 Fixed Tabs + Copy, No Alerts)</title>
-    <!-- Firebase v8 from CDN -->
+    <title>Team Notepad</title>
+    <!-- Include Firebase libraries from the official CDN -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
@@ -11,55 +11,52 @@
         font-family: Arial, sans-serif;
         margin: 20px;
       }
-      .tabs {
+      /* Tab styling */
+      .tab-container {
         display: flex;
-        gap: 10px;
         margin-bottom: 10px;
+        gap: 5px;
       }
       .tab {
-        padding: 5px 10px;
+        padding: 10px 15px;
         cursor: pointer;
-        background: #eee;
-        border-radius: 5px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 5px 5px 0 0;
+        transition: background-color 0.2s;
       }
       .tab.active {
-        background: #ccc;
-        font-weight: bold;
+        background-color: white;
+        border-bottom: 1px solid white;
+      }
+      .tab:hover {
+        background-color: #e0e0e0;
       }
       textarea {
         width: 100%;
         height: 300px;
         font-size: 16px;
         padding: 10px;
+        border: 1px solid #ccc;
+        margin-top: -1px; /* Align with tab border */
       }
-      .controls {
-        margin-top: 10px;
-      }
-      button {
-        font-size: 14px;
-        padding: 5px 10px;
-        cursor: pointer;
-        margin-right: 5px;
-      }
-
       /* Modal styles */
       .modal {
-        display: block; /* Show the modal by default */
+        display: block;
         position: fixed;
         z-index: 1000;
         left: 0;
         top: 0;
         width: 100%;
         height: 100%;
-        overflow: hidden;
-        background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+        background-color: rgba(0, 0, 0, 0.5);
       }
       .modal-content {
         background-color: #fefefe;
-        margin: 15% auto; /* 15% from the top and centered */
+        margin: 15% auto;
         padding: 20px;
         border: 1px solid #888;
-        width: 300px; /* Could be more or less, depending on screen size */
+        width: 300px;
         border-radius: 5px;
         text-align: center;
       }
@@ -74,19 +71,18 @@
         font-size: 16px;
         cursor: pointer;
       }
-      .modal-content p {
-        color: red;
-        display: none;
-      }
-
-      /* Hide the main content initially */
       #mainContent {
         display: none;
+      }
+      #errorMessage {
+        color: red;
+        display: none;
+        margin-top: 10px;
       }
     </style>
   </head>
   <body>
-    <!-- Modal for password entry -->
+    <!-- Password Modal -->
     <div id="passwordModal" class="modal">
       <div class="modal-content">
         <h2>Enter Password</h2>
@@ -97,67 +93,41 @@
       </div>
     </div>
 
-    <!-- Main content -->
+    <!-- Main Content -->
     <div id="mainContent">
-      <h1>Real-Time Notepad</h1>
-      <p>Type anything below. Changes will instantly sync across all browsers!</p>
-
-      <!-- Tabs -->
-      <div class="tabs" id="tabsContainer">
-        <!-- We'll create 5 tabs here in JavaScript -->
+      <h1>Team Notepad</h1>
+      <div class="tab-container">
+        <div class="tab active" data-user="Nitin">Nitin</div>
+        <div class="tab" data-user="Meghna">Meghna</div>
+        <div class="tab" data-user="Robin">Robin</div>
+        <div class="tab" data-user="Imti">Imti</div>
+        <div class="tab" data-user="Karan">Karan</div>
+        <div class="tab" data-user="Rashmi">Rashmi</div>
       </div>
-
-      <!-- Text area -->
+      <p>Type anything below. Changes will instantly sync across all browsers!</p>
       <textarea id="notepad" placeholder="Start typing..."></textarea>
 
-      <!-- Buttons / Controls -->
-      <div class="controls">
-        <button id="copyButton">Copy Text</button>
-      </div>
-
       <script>
-        // ==========================
-        // 1. Password Protection Script
-        // ==========================
-        (function () {
-          const passwordModal = document.getElementById('passwordModal');
-          const submitPassword = document.getElementById('submitPassword');
-          const passwordInput = document.getElementById('passwordInput');
-          const errorMessage = document.getElementById('errorMessage');
-          const mainContent = document.getElementById('mainContent');
-
+        // Password Protection
+        document.getElementById('submitPassword').addEventListener('click', function() {
+          const enteredPassword = document.getElementById('passwordInput').value;
           const correctPassword = 'ni3';
-
-          // Function to handle password submission
-          function handlePasswordSubmit() {
-            const enteredPassword = passwordInput.value;
-            if (enteredPassword === correctPassword) {
-              // Hide modal and show main content
-              passwordModal.style.display = 'none';
-              mainContent.style.display = 'block';
-            } else {
-              // Show error message
-              errorMessage.style.display = 'block';
-              passwordInput.value = '';
-              passwordInput.focus();
-            }
+          if (enteredPassword === correctPassword) {
+            document.getElementById('passwordModal').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+          } else {
+            document.getElementById('errorMessage').style.display = 'block';
           }
+        });
 
-          // Event listener for submit button
-          submitPassword.addEventListener('click', handlePasswordSubmit);
+        document.getElementById('passwordInput').addEventListener('keyup', function(event) {
+          if (event.key === 'Enter') {
+            document.getElementById('submitPassword').click();
+          }
+        });
 
-          // Event listener for Enter key
-          passwordInput.addEventListener('keyup', function (event) {
-            if (event.key === 'Enter') {
-              handlePasswordSubmit();
-            }
-          });
-        })();
-
-        // ==========================
-        // 2. Firebase Config
-        // ==========================
-        var firebaseConfig = {
+        // Firebase Configuration
+        const firebaseConfig = {
           apiKey: "AIzaSyCWfmVe1bh8OXgw0PjnAbfVD6ZOnRJ4-6o",
           authDomain: "clipboard-e729a.firebaseapp.com",
           projectId: "clipboard-e729a",
@@ -169,123 +139,52 @@
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-
-        // Initialize Firestore
         const db = firebase.firestore();
 
-        // ==========================
-        // 3. Setup references/state
-        // ==========================
-        const textArea = document.getElementById("notepad");
-        const copyButton = document.getElementById("copyButton");
-        const tabsContainer = document.getElementById("tabsContainer");
+        let currentNoteRef = null;
+        let unsubscribe = null;
 
-        // We’ll have exactly 5 tabs, each referencing a different Firestore doc
-        const docsList = [
-          { id: "publicNote1", label: "Tab 1" },
-          { id: "publicNote2", label: "Tab 2" },
-          { id: "publicNote3", label: "Tab 3" },
-          { id: "publicNote4", label: "Tab 4" },
-          { id: "publicNote5", label: "Tab 5" },
-        ];
-
-        let activeDocID = null;
-        let unsubscribe = null; // stores a function to stop listening
-
-        // ==========================
-        // 4. Create tab elements
-        // ==========================
-        docsList.forEach((item, index) => {
-          const tabDiv = document.createElement("div");
-          tabDiv.classList.add("tab");
-          if (index === 0) tabDiv.classList.add("active"); // make first one active
-          tabDiv.textContent = item.label;
-          tabDiv.dataset.docid = item.id;
-          tabsContainer.appendChild(tabDiv);
-
-          // Clicking a tab
-          tabDiv.addEventListener("click", () => {
-            switchTab(item.id);
+        // Tab Functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+          tab.addEventListener('click', function() {
+            // Switch active tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Switch to selected user's notepad
+            switchUserNotepad(this.dataset.user);
           });
         });
 
-        // Set the active doc to the first item by default
-        activeDocID = docsList[0].id;
-        subscribeToDoc(activeDocID);
-
-        // ==========================
-        // 5. Subscribe to doc changes
-        // ==========================
-        function subscribeToDoc(docID) {
-          const docRef = db.collection("notes").doc(docID);
-          // Unsubscribe from any previous listener
+        function switchUserNotepad(userId) {
+          // Unsubscribe from previous listener
           if (unsubscribe) unsubscribe();
-
-          unsubscribe = docRef.onSnapshot((doc) => {
+          
+          // Set up new reference
+          currentNoteRef = db.collection("notes").doc(userId);
+          
+          // Set up real-time listener
+          unsubscribe = currentNoteRef.onSnapshot(doc => {
             if (doc.exists) {
               const data = doc.data();
-              if (data && data.content !== textArea.value) {
-                textArea.value = data.content;
+              const textArea = document.getElementById("notepad");
+              if (data.content !== textArea.value) {
+                textArea.value = data.content || '';
               }
-            } else {
-              // doc doesn't exist yet, set empty
-              textArea.value = "";
             }
           });
         }
 
-        // ==========================
-        // 6. Switch tabs
-        // ==========================
-        function switchTab(newDocID) {
-          if (newDocID === activeDocID) return; // no change needed
-          // Stop listening to old doc
-          if (unsubscribe) unsubscribe();
-
-          // Clear text area while we load
-          textArea.value = "";
-
-          // Update activeDocID
-          activeDocID = newDocID;
-          updateTabStyles(newDocID);
-
-          // Subscribe to new doc
-          subscribeToDoc(newDocID);
-        }
-
-        function updateTabStyles(activeID) {
-          const allTabs = document.querySelectorAll(".tab");
-          allTabs.forEach((tab) => {
-            if (tab.dataset.docid === activeID) {
-              tab.classList.add("active");
-            } else {
-              tab.classList.remove("active");
-            }
-          });
-        }
-
-        // ==========================
-        // 7. Sync Firestore on text changes
-        // ==========================
-        textArea.addEventListener("input", () => {
-          if (!activeDocID) return;
-          const docRef = db.collection("notes").doc(activeDocID);
-          docRef.set({ content: textArea.value });
+        // Textarea Input Handling
+        document.getElementById("notepad").addEventListener("input", function() {
+          if (currentNoteRef) {
+            currentNoteRef.set({ content: this.value })
+              .catch(error => console.error("Error writing document: ", error));
+          }
         });
 
-        // ==========================
-        // 8. Copy button (no alerts)
-        // ==========================
-        copyButton.addEventListener("click", () => {
-          navigator.clipboard
-            .writeText(textArea.value)
-            .then(() => {
-              console.log("Text copied to clipboard (no alert).");
-            })
-            .catch((err) => {
-              console.error("Copy failed: ", err);
-            });
-        });
+        // Initialize with first user
+        switchUserNotepad('Nitin');
       </script>
     </div>
   </body>
