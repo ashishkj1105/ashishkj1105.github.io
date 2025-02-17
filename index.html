@@ -259,6 +259,31 @@
                 flex: 1 1 40%;
             }
         }
+
+        .tab-group {
+            margin-bottom: 0.5rem;
+        }
+        .dropdown-arrow {
+            display: inline-block;
+            margin-left: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+        .dropdown-arrow.open {
+            transform: rotate(90deg);
+        }
+        .subtabs {
+            display: none;
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+        }
+        .subtabs.show {
+            display: block;
+        }
+        .radio .name {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
     </style>
 </head>
 <body>
@@ -372,20 +397,104 @@
         const copyButton = document.getElementById("copyButton");
         const tabsContainer = document.getElementById("tabsContainer");
 
+        // Modify the docsList array to include subtabs
         const docsList = [
-            { id: "publicNote1", label: "Nitin" },
-            { id: "publicNote2", label: "Meghna" },
-            { id: "publicNote3", label: "Robin" },
-            { id: "publicNote4", label: "Imti" },
-            { id: "publicNote5", label: "Karan" },
-            { id: "publicNote6", label: "Rashmi" },
+            { 
+                id: "publicNote1", 
+                label: "Nitin",
+                subtabs: [
+                    { id: "nitin_sub1", label: "Personal" },
+                    { id: "nitin_sub2", label: "Work" },
+                    { id: "nitin_sub3", label: "Notes" }
+                ]
+            },
+            { 
+                id: "publicNote2", 
+                label: "Meghna",
+                subtabs: [
+                    { id: "meghna_sub1", label: "Personal" },
+                    { id: "meghna_sub2", label: "Work" },
+                    { id: "meghna_sub3", label: "Notes" }
+                ]
+            },
+            { 
+                id: "publicNote3", 
+                label: "Robin",
+                subtabs: [
+                    { id: "meghna_sub1", label: "Personal" },
+                    { id: "meghna_sub2", label: "Work" },
+                    { id: "meghna_sub3", label: "Notes" }
+                ]
+            },
+            { 
+                id: "publicNote4", 
+                label: "Imti",
+                subtabs: [
+                    { id: "meghna_sub1", label: "Personal" },
+                    { id: "meghna_sub2", label: "Work" },
+                    { id: "meghna_sub3", label: "Notes" }
+                ] 
+            },
+            { 
+                id: "publicNote5", 
+                label: "Karan",
+                subtabs: [
+                    { id: "meghna_sub1", label: "Personal" },
+                    { id: "meghna_sub2", label: "Work" },
+                    { id: "meghna_sub3", label: "Notes" }
+                ]
+            },
+            { 
+                id: "publicNote6", 
+                label: "Rashmi",
+                subtabs: [
+                    { id: "meghna_sub1", label: "Personal" },
+                    { id: "meghna_sub2", label: "Work" },
+                    { id: "meghna_sub3", label: "Notes" }
+                ] 
+            },
         ];
 
         let activeDocID = null;
         let unsubscribe = null;
 
-        // Initialize Tabs
+        // Add the styles to the document
+        const newStyles = `
+            .tab-group {
+                margin-bottom: 0.5rem;
+            }
+            .dropdown-arrow {
+                display: inline-block;
+                margin-left: 0.5rem;
+                transition: transform 0.3s ease;
+            }
+            .dropdown-arrow.open {
+                transform: rotate(90deg);
+            }
+            .subtabs {
+                display: none;
+                margin-left: 1.5rem;
+                margin-top: 0.5rem;
+            }
+            .subtabs.show {
+                display: block;
+            }
+            .radio .name {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+        `;
+
+        const styleSheet = document.createElement("style");
+        styleSheet.textContent = newStyles;
+        document.head.appendChild(styleSheet);
+
+        // Modify the tab initialization code
         docsList.forEach((item, index) => {
+            const tabGroup = document.createElement("div");
+            tabGroup.className = "tab-group";
+            
             const label = document.createElement("label");
             label.className = "radio";
             
@@ -397,7 +506,41 @@
             
             const span = document.createElement("span");
             span.className = "name";
-            span.textContent = item.label;
+            span.innerHTML = `${item.label} <span class="dropdown-arrow">▶</span>`;
+
+            const subtabsContainer = document.createElement("div");
+            subtabsContainer.className = "subtabs";
+
+            // Create subtabs
+            item.subtabs.forEach(subtab => {
+                const subtabLabel = document.createElement("label");
+                subtabLabel.className = "radio";
+                
+                const subtabInput = document.createElement("input");
+                subtabInput.type = "radio";
+                subtabInput.name = "radio";
+                subtabInput.dataset.docid = subtab.id;
+                
+                const subtabSpan = document.createElement("span");
+                subtabSpan.className = "name";
+                subtabSpan.textContent = subtab.label;
+
+                subtabInput.addEventListener("change", function() {
+                    if (this.checked) switchTab(this.dataset.docid);
+                });
+
+                subtabLabel.appendChild(subtabInput);
+                subtabLabel.appendChild(subtabSpan);
+                subtabsContainer.appendChild(subtabLabel);
+            });
+
+            // Add click handler for dropdown
+            span.querySelector('.dropdown-arrow').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                subtabsContainer.classList.toggle('show');
+                span.querySelector('.dropdown-arrow').classList.toggle('open');
+            });
 
             input.addEventListener("change", function() {
                 if (this.checked) switchTab(this.dataset.docid);
@@ -405,7 +548,9 @@
 
             label.appendChild(input);
             label.appendChild(span);
-            tabsContainer.appendChild(label);
+            tabGroup.appendChild(label);
+            tabGroup.appendChild(subtabsContainer);
+            tabsContainer.appendChild(tabGroup);
         });
 
         // Firebase Functions
