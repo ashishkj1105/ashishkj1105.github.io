@@ -107,35 +107,16 @@
             padding: 0.5rem 1.5rem;
             background: var(--surface);
             border-bottom: 1px solid var(--border-color);
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-        }
-
-        .tabs-container::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .tabs-container::-webkit-scrollbar-track {
-            background: var(--surface);
-        }
-
-        .tabs-container::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 3px;
         }
 
         .radio-inputs {
             display: flex;
             gap: 0.5rem;
-            flex-wrap: nowrap;
-            min-width: min-content;
         }
 
         .radio {
-            flex: 0 0 auto;
+            flex: 1;
             position: relative;
-            min-width: 120px;
         }
 
         .radio input {
@@ -276,23 +257,6 @@
             
             .radio {
                 flex: 1 1 40%;
-            }
-
-            .tabs-container {
-                padding: 0.5rem 1rem;
-            }
-            
-            .radio .name {
-                padding: 0.5rem 0.75rem;
-                font-size: 0.813rem;
-            }
-            
-            .radio {
-                min-width: 100px;
-            }
-            
-            .subtabs {
-                margin-left: 0.75rem;
             }
         }
 
