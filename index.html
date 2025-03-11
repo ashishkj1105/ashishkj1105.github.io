@@ -486,7 +486,7 @@
         let unsubscribe = null;
 
         // Add the styles to the document
-        const newStyles = 
+        const newStyles = `
             .tab-group {
                 margin-bottom: 0.5rem;
             }
@@ -511,7 +511,7 @@
                 align-items: center;
                 justify-content: space-between;
             }
-        ;
+        `;
 
         const styleSheet = document.createElement("style");
         styleSheet.textContent = newStyles;
@@ -533,7 +533,7 @@
             
             const span = document.createElement("span");
             span.className = "name";
-            span.innerHTML = ${item.label} <span class="dropdown-arrow">▶</span>;
+            span.innerHTML = `${item.label} <span class="dropdown-arrow">▶</span>`;
 
             const subtabsContainer = document.createElement("div");
             subtabsContainer.className = "subtabs";
