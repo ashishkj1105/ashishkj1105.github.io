@@ -111,12 +111,14 @@
 
         .radio-inputs {
             display: flex;
+            flex-wrap: wrap;
             gap: 0.5rem;
         }
 
         .radio {
-            flex: 1;
+            flex: 1 1 auto;
             position: relative;
+            min-width: 100px; /* Adjust this value as needed */
         }
 
         .radio input {
